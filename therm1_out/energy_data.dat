@@ -1,0 +1,14 @@
+start    at                                   =  400
+ends at                                       =  500
+number of moving atoms                        = 32
+mean kinetic energy                           =       0.044745858212000000
+std of kinetic energy                         =       0.006313699609922622
+mean potential energy                         =    -359.796019200315981834
+std of potential energy                       =       0.006658115931818189
+mean total energy                             =    -359.751273342107936060
+std of total energy                           =       0.009308474636815325
+------------------------------------------------------------------------
+temperature from mean kinetic energy          =  294.3690180960568 K
+thermal fluctuations of the totalenergy       =  10.206207261596576 %
+total energy fluctuations compared to 3N*KT   =  10.401493019435446 %
+kinetic energy fluctuations compared to 3N*KT =  7.055065946002356 %
