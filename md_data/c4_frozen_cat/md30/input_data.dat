@@ -1,0 +1,14 @@
+total_time:    9.7
+nsteps:    9700
+natoms:    323
+nonmvat:    261
+nmovingatoms:    62
+MDRestartFrequency:    10
+dt:    1
+noh:    1
+nwater:    20
+nox:    21
+nhy:    41
+xbox:    12.664
+ybox:    13.3552
+zbox:    40.0
