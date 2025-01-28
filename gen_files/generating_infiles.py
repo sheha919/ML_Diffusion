@@ -1,108 +1,259 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-import os
-import numpy as np
-
-
-# In[2]:
-
-
-def gen_infiles(out_file, in_file, natoms, matoms, bx, by, bz):
-    #This function is to extract the necessary information from output files and generate the next input file 
-
-    atom= []
-    x=[]
-    y=[]
-    z= []
-    vx=[]
-    vy=[]
-    vz= []
-    with open(os.path.join(f"{out_file}.xyz"), 'r') as out_file:
-        xyz= out_file.readlines()
-        end = len(xyz)
-        start =end - natoms
-        for i in range(start, end, 1):                
-            atom.append(xyz[i].split()[0])
-            x.append(float(xyz[i].split()[1]))
-            y.append(float(xyz[i].split()[2]))
-            z.append(float(xyz[i].split()[3]))
-            vx.append(float(xyz[i].split()[5]))
-            vy.append(float(xyz[i].split()[6]))
-            vz.append(float(xyz[i].split()[7]))
-
-    with open(os.path.join(f"{in_file}.hsd"), 'w') as in_file:
-        in_file.write("#" + "\n" + "Geometry = GenFormat {" + "\n" + str(natoms) + " S" + "\n" + "C  H  O N" + "\n")
-
-        for i in range(natoms):
-            if atom[i]=='C':
-                in_file.write(str(i+1) + " 1" + " " + str(x[i]) + " " + str(y[i]) + " " + str(z[i])+"\n")
-            if atom[i]=='H':
-                in_file.write(str(i+1) + " 2" + " " + str(x[i]) + " " + str(y[i]) + " " + str(z[i])+"\n")
-            if atom[i]=='O':
-                in_file.write(str(i+1) + " 3" + " " + str(x[i]) + " " + str(y[i]) + " " + str(z[i])+"\n")
-            if atom[i]=='N':
-                in_file.write(str(i+1) + " 4" + " " + str(x[i]) + " " + str(y[i]) + " " + str(z[i])+"\n")
-
-        in_file.write("#dimensions of perodic box" + "\n")
-        in_file.write( "     0.000     0.000     0.000" + "\n" + "    " + f"{bx:.3f}" + "     0.000     0.000" + "\n" + "     0.000     " + f"{by:.3f}" + "    0.000" + "\n" + "     0.000     0.000     " + f"{bz:.3f}" + "\n" )
-        in_file.write("}" + "\n" + "Driver = VelocityVerlet{" + "\n" + "  TimeStep [fs] = 1" + "\n" + "  Thermostat = None{}" + "\n" + "  Steps = 10000" + "\n")  
-        in_file.write("  MovedAtoms ="+ str(matoms) +":-1 # last -1 means all atoms; otherwise list first:last out of movable" + "\n" )
-        in_file.write("  MDRestartFrequency = 10" + "\n" + "  ConvergentForcesOnly = Yes #if the SCC cycle does not converge at any geometric step, forces will be calculated using the non-converged charges" + "\n" )
-        in_file.write("  Velocities [AA/ps] {" + "\n" )
-
-        for i in range(natoms):
-            in_file.write("   " + f"{vx[i]:.8f}" + "   " + f"{vy[i]:.8f}" + "   " + f"{vz[i]:.8f}" +"\n")
-
-        in_file.write("	}" +"\n")             
-        in_file.write("}" +"\n"+"\n" )           
-        in_file.write("Hamiltonian = DFTB {"+"\n")
-        in_file.write("  Scc = Yes" +"\n")
-        in_file.write("  SCCTolerance = 1e-005"+"\n")
-        in_file.write("  MaxSCCIterations= 500"+"\n")
-        in_file.write("# set non-zero temperature for convergence"+"\n")
-        in_file.write("  Filling = Fermi {"+"\n")
-        in_file.write("  Temperature[K] = 300.0"+"\n")
-        in_file.write("  }"+"\n"+"\n" )  
-        in_file.write(" SlaterKosterFiles = Type2FileNames {"+"\n")
-        in_file.write('  Prefix = "/home/shehani/DOE_project/slakos/" '+"\n")
-        in_file.write('  Separator = "-"                     # Dash between type names'+"\n")
-        in_file.write('  Suffix = ".skf"' +"\n")
-        in_file.write(" }"+"\n"+"\n")
-        in_file.write("  MaxAngularMomentum {"+"\n")
-        in_file.write('    C = "p"'+"\n")
-        in_file.write('    N = "p"'+"\n")
-        in_file.write('    O = "p"'+"\n")
-        in_file.write('    H = "s"'+"\n")
-        in_file.write("  }"+"\n")
-        in_file.write(" KPointsAndWeights = {"+"\n")
-        in_file.write(" 0 0 0 1.0"+"\n")
-        in_file.write(" }"+"\n")
-        in_file.write("}"+"\n"+"\n")
-        in_file.write("Options {" +"\n")
-        in_file.write(" WriteChargesAsText = yes"+"\n")
-        in_file.write("}"+"\n"+"\n")
-        in_file.write("Analysis {"+"\n")
-        in_file.write("  CalculateForces = Yes"+"\n")
-        in_file.write("}"+"\n"+"\n")
-        in_file.write("ParserOptions {"+"\n")
-        in_file.write("  ParserVersion = 7"+"\n")
-        in_file.write("}"+"\n")
-                    
-         
-
-
-# In[3]:
-
-
-gen_infiles('geo_end', 'test', 335, 304, 15.198, 13.5, 40)
-
-
-# In[ ]:
-
-
-
-
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "303ca577-5edb-45e9-8f71-319b5938e58d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os\n",
+    "import numpy as np"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "ecf2d932-d696-4e44-b84e-3cb3caf1e310",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def gen_therm_infiles(in_xyz, in_file, natoms, matoms, bx, by, bz):\n",
+    "    #This function is to generate input file for thermalization step using the given input geometry of the system (xyz file) \n",
+    "\n",
+    "    atom= []\n",
+    "    x=[]\n",
+    "    y=[]\n",
+    "    z= []\n",
+    "    with open(os.path.join(f\"{in_xyz}.xyz\"), 'r') as xyz_file:\n",
+    "        #for iqmol xyz\n",
+    "        xyz= xyz_file.readlines()[2:]\n",
+    "        #for regular xyz\n",
+    "    #    xyz= xyz_file.readlines()\n",
+    "        for indx,line in enumerate(xyz):\n",
+    "            atom.append(str(line.split()[0]))\n",
+    "            x.append(float(line.split()[1]))\n",
+    "            y.append(float(line.split()[2]))\n",
+    "            z.append(float(line.split()[3]))\n",
+    "                \n",
+    "    with open(os.path.join(f\"{in_file}.hsd\"), 'w') as in_file:\n",
+    "        in_file.write(\"#\" + \"\\n\" + \"Geometry = GenFormat {\" + \"\\n\" + str(natoms) + \" S\" + \"\\n\" + \"C  H  O N\" + \"\\n\")\n",
+    "\n",
+    "        for i in range(natoms):\n",
+    "            if atom[i]=='C':\n",
+    "                in_file.write(str(i+1) +\"   \"+ \" 1\" + \"   \" + f\"{x[i]:.8f}\" + \"   \" + f\"{y[i]:.8f}\" + \"   \" + f\"{z[i]:.8f}\"+\"\\n\")\n",
+    "            if atom[i]=='H':\n",
+    "                in_file.write(str(i+1) +\"   \"+ \" 2\" + \"   \" + f\"{x[i]:.8f}\" + \"   \" + f\"{y[i]:.8f}\" + \"   \" + f\"{z[i]:.8f}\"+\"\\n\")\n",
+    "            if atom[i]=='O':\n",
+    "                in_file.write(str(i+1) +\"   \"+ \" 3\" + \"   \" + f\"{x[i]:.8f}\" + \"   \" + f\"{y[i]:.8f}\" + \"   \" + f\"{z[i]:.8f}\"+\"\\n\")\n",
+    "            if atom[i]=='N':\n",
+    "                in_file.write(str(i+1) +\"   \"+ \" 4\" + \"   \" + f\"{x[i]:.8f}\" + \"   \" + f\"{y[i]:.8f}\" + \"   \" + f\"{z[i]:.8f}\"+\"\\n\")\n",
+    "\n",
+    "        in_file.write(\"#dimensions of perodic box\" + \"\\n\")\n",
+    "        in_file.write( \"     0.000     0.000     0.000\" + \"\\n\" + \"    \" + f\"{bx:.3f}\" + \"     0.000     0.000\" + \"\\n\" + \"     0.000     \" + f\"{by:.3f}\" + \"    0.000\" + \"\\n\" + \"     0.000     0.000     \" + f\"{bz:.3f}\" + \"\\n\" )\n",
+    "        in_file.write(\"}\" + \"\\n\" + \"Driver = VelocityVerlet{\" + \"\\n\" + \"  TimeStep [fs] = 1\" + \"\\n\")\n",
+    "        in_file.write(\"  Thermostat = NoseHoover {\" + \"\\n\" + \"    Temperature [Kelvin] = 300\" + \"\\n\"+\"    CouplingStrength [cm^-1] = 3700\" + \"\\n\"+ \"  }\"+ \"\\n\")\n",
+    "        in_file.write(\"  Steps = 5000\" + \"\\n\")  \n",
+    "        in_file.write(\"  MovedAtoms =\"+ str(matoms) +\":-1 # last -1 means all atoms; otherwise list first:last out of movable\" + \"\\n\" )\n",
+    "        in_file.write(\"  MDRestartFrequency = 10\" + \"\\n\" + \"  ConvergentForcesOnly = Yes #if the SCC cycle does not converge at any geometric step, forces will be calculated using the non-converged charges\" + \"\\n\" )\n",
+    "        in_file.write(\"  ConvergentForcesOnly = No #if the SCC cycle does not converge at any geometric step, forces will be calculated using the non-converged charges\" + \"\\n\" )\n",
+    "        in_file.write(\"\t}\" +\"\\n\")                       \n",
+    "        in_file.write(\"Hamiltonian = DFTB {\"+\"\\n\")\n",
+    "        in_file.write(\"  Scc = Yes\" +\"\\n\")\n",
+    "        in_file.write(\"  SCCTolerance = 1e-005\"+\"\\n\")\n",
+    "        in_file.write(\"  MaxSCCIterations= 500\"+\"\\n\")\n",
+    "        in_file.write(\"# set non-zero temperature for convergence\"+\"\\n\")\n",
+    "        in_file.write(\"  Filling = Fermi {\"+\"\\n\")\n",
+    "        in_file.write(\"  Temperature[K] = 300.0\"+\"\\n\")\n",
+    "        in_file.write(\"  }\"+\"\\n\"+\"\\n\" )  \n",
+    "        in_file.write(\" SlaterKosterFiles = Type2FileNames {\"+\"\\n\")\n",
+    "        in_file.write('  Prefix = \"/home/shehani/DOE_project/slakos/\" '+\"\\n\")\n",
+    "        in_file.write('  Separator = \"-\"                     # Dash between type names'+\"\\n\")\n",
+    "        in_file.write('  Suffix = \".skf\"' +\"\\n\")\n",
+    "        in_file.write(\" }\"+\"\\n\"+\"\\n\")\n",
+    "        in_file.write(\"  MaxAngularMomentum {\"+\"\\n\")\n",
+    "        in_file.write('    C = \"p\"'+\"\\n\")\n",
+    "        in_file.write('    N = \"p\"'+\"\\n\")\n",
+    "        in_file.write('    O = \"p\"'+\"\\n\")\n",
+    "        in_file.write('    H = \"s\"'+\"\\n\")\n",
+    "        in_file.write(\"  }\"+\"\\n\")\n",
+    "        in_file.write(\" KPointsAndWeights = {\"+\"\\n\")\n",
+    "        in_file.write(\" 0 0 0 1.0\"+\"\\n\")\n",
+    "        in_file.write(\" }\"+\"\\n\")\n",
+    "        in_file.write(\"}\"+\"\\n\"+\"\\n\")\n",
+    "        in_file.write(\"Options {\" +\"\\n\")\n",
+    "        in_file.write(\" WriteChargesAsText = yes\"+\"\\n\")\n",
+    "        in_file.write(\"}\"+\"\\n\"+\"\\n\")\n",
+    "        in_file.write(\"Analysis {\"+\"\\n\")\n",
+    "        in_file.write(\"  CalculateForces = Yes\"+\"\\n\")\n",
+    "        in_file.write(\"}\"+\"\\n\"+\"\\n\")\n",
+    "        in_file.write(\"ParserOptions {\"+\"\\n\")\n",
+    "        in_file.write(\"  ParserVersion = 7\"+\"\\n\")\n",
+    "        in_file.write(\"}\"+\"\\n\")\n",
+    "                    \n",
+    "         \n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "c0516cdb-7c05-4253-8927-9dac28f6b99f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def gen_md_infiles(out_file, in_file, natoms, matoms, bx, by, bz):\n",
+    "    #This function is to extract the necessary information from output files and generate the next input file \n",
+    "\n",
+    "    atom= []\n",
+    "    x=[]\n",
+    "    y=[]\n",
+    "    z= []\n",
+    "    vx=[]\n",
+    "    vy=[]\n",
+    "    vz= []\n",
+    "    x_new=[]\n",
+    "    y_new=[]\n",
+    "    z_new= []\n",
+    "    with open(os.path.join(f\"{out_file}.xyz\"), 'r') as out_file:\n",
+    "        xyz= out_file.readlines()\n",
+    "        end = len(xyz)\n",
+    "        start =end - natoms\n",
+    "        for i in range(start, end, 1):                \n",
+    "            atom.append(xyz[i].split()[0])\n",
+    "            x.append(float(xyz[i].split()[1]))\n",
+    "            y.append(float(xyz[i].split()[2]))\n",
+    "            z.append(float(xyz[i].split()[3]))\n",
+    "            vx.append(float(xyz[i].split()[5]))\n",
+    "            vy.append(float(xyz[i].split()[6]))\n",
+    "            vz.append(float(xyz[i].split()[7]))\n",
+    "            \n",
+    "    #moving water molecules into the box \n",
+    "    for i in range(natoms):\n",
+    "        if abs(x[i])>bx/2:\n",
+    "            x_new.append(float(x[i]-bx))\n",
+    "        if abs(x[i])<bx/2:\n",
+    "            x_new.append(float(x[i]+bx))\n",
+    "        if abs(y[i])>by/2:\n",
+    "            y_new.append(float(y[i]-by))\n",
+    "        if abs(y[i])<by/2:\n",
+    "            y_new.append(float(y[i]+by))\n",
+    "        if abs(z[i])>bz/2:\n",
+    "            z_new.append(float(z[i]-bz))\n",
+    "        if abs(z[i])<bz/2:\n",
+    "            z_new.append(float(z[i]+bz))\n",
+    "\n",
+    "\n",
+    "            \n",
+    "\n",
+    "    with open(os.path.join(f\"{in_file}.hsd\"), 'w') as in_file:\n",
+    "        in_file.write(\"#\" + \"\\n\" + \"Geometry = GenFormat {\" + \"\\n\" + str(natoms) + \" S\" + \"\\n\" + \"C  H  O N\" + \"\\n\")\n",
+    "\n",
+    "        for i in range(natoms):\n",
+    "            if atom[i]=='C':\n",
+    "                in_file.write(str(i+1) +\"   \"+ \" 1\" + \"   \" + f\"{x_new[i]:.8f}\" + \"   \" + f\"{y_new[i]:.8f}\" + \"   \" + f\"{z_new[i]:.8f}\"+\"\\n\")\n",
+    "            if atom[i]=='H':\n",
+    "                in_file.write(str(i+1) +\"   \"+ \" 2\" + \"   \" + f\"{x_new[i]:.8f}\" + \"   \" + f\"{y_new[i]:.8f}\" + \"   \" + f\"{z_new[i]:.8f}\"+\"\\n\")\n",
+    "            if atom[i]=='O':\n",
+    "                in_file.write(str(i+1) +\"   \"+ \" 3\" + \"   \" + f\"{x_new[i]:.8f}\" + \"   \" + f\"{y_new[i]:.8f}\" + \"   \" + f\"{z_new[i]:.8f}\"+\"\\n\")\n",
+    "            if atom[i]=='N':\n",
+    "                in_file.write(str(i+1) +\"   \"+ \" 4\" + \"   \" + f\"{x_new[i]:.8f}\" + \"   \" + f\"{y_new[i]:.8f}\" + \"   \" + f\"{z_new[i]:.8f}\"+\"\\n\")\n",
+    "\n",
+    "        in_file.write(\"#dimensions of perodic box\" + \"\\n\")\n",
+    "        in_file.write( \"     0.000     0.000     0.000\" + \"\\n\" + \"    \" + f\"{bx:.3f}\" + \"     0.000     0.000\" + \"\\n\" + \"     0.000     \" + f\"{by:.3f}\" + \"    0.000\" + \"\\n\" + \"     0.000     0.000     \" + f\"{bz:.3f}\" + \"\\n\" )\n",
+    "        in_file.write(\"}\" + \"\\n\" + \"Driver = VelocityVerlet{\" + \"\\n\" + \"  TimeStep [fs] = 1\" + \"\\n\" + \"  Thermostat = None{}\" + \"\\n\" + \"  Steps = 10000\" + \"\\n\")  \n",
+    "        in_file.write(\"  MovedAtoms =\"+ str(matoms) +\":-1 # last -1 means all atoms; otherwise list first:last out of movable\" + \"\\n\" )\n",
+    "        in_file.write(\"  MDRestartFrequency = 10\" + \"\\n\" + \"  ConvergentForcesOnly = Yes #if the SCC cycle does not converge at any geometric step, forces will be calculated using the non-converged charges\" + \"\\n\" )\n",
+    "        in_file.write(\"  Velocities [AA/ps] {\" + \"\\n\" )\n",
+    "\n",
+    "        for i in range(natoms):\n",
+    "            in_file.write(\"   \" + f\"{vx[i]:.8f}\" + \"   \" + f\"{vy[i]:.8f}\" + \"   \" + f\"{vz[i]:.8f}\" +\"\\n\")\n",
+    "\n",
+    "        in_file.write(\"\t}\" +\"\\n\")             \n",
+    "        in_file.write(\"}\" +\"\\n\"+\"\\n\" )           \n",
+    "        in_file.write(\"Hamiltonian = DFTB {\"+\"\\n\")\n",
+    "        in_file.write(\"  Scc = Yes\" +\"\\n\")\n",
+    "        in_file.write(\"  SCCTolerance = 1e-005\"+\"\\n\")\n",
+    "        in_file.write(\"  MaxSCCIterations= 500\"+\"\\n\")\n",
+    "        in_file.write(\"# set non-zero temperature for convergence\"+\"\\n\")\n",
+    "        in_file.write(\"  Filling = Fermi {\"+\"\\n\")\n",
+    "        in_file.write(\"  Temperature[K] = 300.0\"+\"\\n\")\n",
+    "        in_file.write(\"  }\"+\"\\n\"+\"\\n\" )  \n",
+    "        in_file.write(\" SlaterKosterFiles = Type2FileNames {\"+\"\\n\")\n",
+    "        in_file.write('  Prefix = \"/home/shehani/DOE_project/slakos/\" '+\"\\n\")\n",
+    "        in_file.write('  Separator = \"-\"                     # Dash between type names'+\"\\n\")\n",
+    "        in_file.write('  Suffix = \".skf\"' +\"\\n\")\n",
+    "        in_file.write(\" }\"+\"\\n\"+\"\\n\")\n",
+    "        in_file.write(\"  MaxAngularMomentum {\"+\"\\n\")\n",
+    "        in_file.write('    C = \"p\"'+\"\\n\")\n",
+    "        in_file.write('    N = \"p\"'+\"\\n\")\n",
+    "        in_file.write('    O = \"p\"'+\"\\n\")\n",
+    "        in_file.write('    H = \"s\"'+\"\\n\")\n",
+    "        in_file.write(\"  }\"+\"\\n\")\n",
+    "        in_file.write(\" KPointsAndWeights = {\"+\"\\n\")\n",
+    "        in_file.write(\" 0 0 0 1.0\"+\"\\n\")\n",
+    "        in_file.write(\" }\"+\"\\n\")\n",
+    "        in_file.write(\"}\"+\"\\n\"+\"\\n\")\n",
+    "        in_file.write(\"Options {\" +\"\\n\")\n",
+    "        in_file.write(\" WriteChargesAsText = yes\"+\"\\n\")\n",
+    "        in_file.write(\"}\"+\"\\n\"+\"\\n\")\n",
+    "        in_file.write(\"Analysis {\"+\"\\n\")\n",
+    "        in_file.write(\"  CalculateForces = Yes\"+\"\\n\")\n",
+    "        in_file.write(\"}\"+\"\\n\"+\"\\n\")\n",
+    "        in_file.write(\"ParserOptions {\"+\"\\n\")\n",
+    "        in_file.write(\"  ParserVersion = 7\"+\"\\n\")\n",
+    "        in_file.write(\"}\"+\"\\n\")\n",
+    "                    \n",
+    "         \n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "da774c4f-0391-45d4-92c3-046e431db4ca",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gen_md_infiles('../md_data/c4_frozen_cat/md30/geo_end', 'test1', 335, 304, 15.198, 13.5, 40)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "de08a5d5-e5ec-4692-a16f-072328436c7e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gen_therm_infiles('../gen_graphenebox/c4_double_cat', 'test2', 462, 433, 22.797, 13.392, 60)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f6178d15-bfc5-418b-9d26-a1b04ffffcef",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
