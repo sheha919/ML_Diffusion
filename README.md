@@ -1,4 +1,4 @@
-# Predicting OH Diffusion in the dual-cation AEM using ML 
+# Predicting OH<sup>-</sup> Diffusion in the dual-cation AEM using ML 
 Author: Shehani Wetthasinghe
 
 Last modified: 03/17/2025
