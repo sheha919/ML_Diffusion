@@ -20,3 +20,11 @@ Steps to generate the systems/input files:
 7. Analyze the thermalization statistics to confirm that the system has reached proper thermal equilibrium: [gen_graphenebox/therm_analysis.py](https://github.com/sheha919/ML_Diffusion/blob/main/gen_graphenebox/therm_analysis.py)
 8. Generate multiple input files for molecular dynamics simulations simultaneously using the final geometry extracted from the thermalization step: [gen_graphenebox/gen_sim.py](https://github.com/sheha919/ML_Diffusion/blob/main/gen_graphenebox/gen_sim.py)
 9. Check for thermalization statistics at the end of dynamics simulations.
+
+Steps to analyze MD data:
+1. Identify single or dual OH<sup>-</sup> in each MD step for single cation or dual cation systems.
+   * single cation system: [md_analysis/oh_identifier_single.py](https://github.com/sheha919/ML_Diffusion/blob/main/md_analysis/oh_identifier_single.py)
+   * dual cation system: [md_analysis/oh_identifier_dual.py](https://github.com/sheha919/ML_Diffusion/blob/main/md_analysis/oh_identifier_dual.py)
+2. Calculate the diffusion coefficient(s)
+    * single cation system: [md_analysis/individual_based_newD_single.ipynb](https://github.com/sheha919/ML_Diffusion/blob/main/md_analysis/individual_based_newD_single.ipynb)
+    * dual cation system: [md_analysis/individual_based_newD_dual.ipynb](https://github.com/sheha919/ML_Diffusion/blob/main/md_analysis/individual_based_newD_dual.ipynb)
