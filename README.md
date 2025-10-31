@@ -8,7 +8,7 @@ Last modified: 10/31/2025
 This repository contains Python scripts to generate the systems/input files for Molecular Dynamics simulation in DFTB+ and conduct the analysis/further calculations based on the performed simulations.
 
 Steps to generate the systems/input files:
-1. Generate the initial configuration containing two graphene sheets with a specified separation along the Z-axis and defined simulation box dimensions in the X and Y directions. his script also calculates the number of water molecules required to achieve the specified water number density for a given box size with the selected single or dual cations: [gen_graphenebox/generate_sheets.ipynb](https://github.com/sheha919/ML_Diffusion/blob/main/gen_graphenebox/generate_sheets.ipynb)
+1. Generate the initial configuration containing two graphene sheets with a specified separation along the Z-axis and defined simulation box dimensions in the X and Y directions. This script also calculates the number of water molecules required to achieve the specified water number density for a given box size with the selected single or dual cations: [gen_graphenebox/generate_sheets.ipynb](https://github.com/sheha919/ML_Diffusion/blob/main/gen_graphenebox/generate_sheets.ipynb)
 2. Translate the system to the center using IQmol
 3. Add selected single or dual cations with the preferred orientation.
      * single cation to the top graphene sheet: [gen_graphenebox/add_cations.ipynb](https://github.com/sheha919/ML_Diffusion/blob/main/gen_graphenebox/add_cations.ipynb)
